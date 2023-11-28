@@ -5,8 +5,6 @@ from torch.utils.data import Dataset
 from torchvision import transforms, models
 import cv2
 
-
-
 data_transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((224, 224)),
@@ -40,7 +38,7 @@ class DoggyDataset(Dataset):
         coords = self.img_labels[idx].split('(')[1]
         x = coords.split(',')[0].strip()
         y = coords.split(',')[1].split(')')[0].strip()
-        label = torch.tensor([x, y])
+        label = torch.tensor([float(x), float(y)])
    
         if self.transform:
             image = self.transform(image)
