@@ -41,7 +41,10 @@ class DoggyDataset(Dataset):
         label = torch.tensor([float(x), float(y)])
    
         if self.transform:
-            image = self.transform(image)
+            try:
+                image = self.transform(image)
+            except:
+                print(img_path)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
