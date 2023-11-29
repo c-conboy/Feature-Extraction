@@ -60,7 +60,7 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model_ft.parameters(), lr=0.0001)
 
 #Run train for Epoch
-loss_at_epoch = torch.zeros(Epochs)
+loss_at_epoch = []
 for epoch in range(Epochs):
         running_loss_over_epoch = 0
         for imgs, labels in train_dataloader:
@@ -74,7 +74,7 @@ for epoch in range(Epochs):
                         loss.backward()
                         optimizer.step()
                         running_loss_over_epoch += loss.item()
-        loss_at_epoch += [running_loss_over_epoch/len(train_dataset)]
+        loss_at_epoch += running_loss_over_epoch/len(train_dataset)
         print(loss_at_epoch)
 
 torch.save(model_ft.state_dict(), 'model.pth')
