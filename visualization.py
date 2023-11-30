@@ -22,13 +22,14 @@ import statistics
 #Parse Input Arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-weights', type=str, default = None)
-parser.add_argument('-cuda', type=str, help='[Y/N]', default = 'N')
+parser.add_argument('-index', type=int, help='[Y/N]', default = 0)
 parser.add_argument('-dataset', type=str, default = '../datasets/doggies/images_test')
 parser.add_argument('-label', type=str, default = '../datasets/doggies/test_labels.txt')
 args = parser.parse_args()
 Weights = args.weights
 Dataset_Path = args.dataset
 Label_Path = args.label
+idx = args.index
 
 #Set Device
 device = torch.device("cuda" if torch.cuda.is_available() and args.cuda == 'Y' else "cpu")
@@ -47,27 +48,32 @@ if(Weights):
         model_ft.load_state_dict(torch.load(Weights, map_location=torch.device(device)))
 model_ft = model_ft.to(device)
 
-#For each test image get inference
-distances = []
-for img, label in test_dataloader:
-    output = model_ft(img)
-    e_dist = math.dist(output[0].detach().numpy(), label.numpy()[0])
-    distances += [e_dist]
+#Get Inference
 
-#Get Statistical Data for lists
-avg_dist = sum(distances)/len(distances)
-std = statistics.pstdev(distances) 
-max = max(distances)
-min = min(distances)
+start = time.time()
+output = model_ft(test_dataset[idx][0].unsqueeze(0))
+end = time.time()
+print(end - start)
 
-print("Average:")
-print(avg_dist)
+center = (int(output[0][0].item()), int(output[0][1].item()))
+#Visualize Image
+with open(Label_Path, "r") as f:
+        labels = []
+        for line in f:
+            labels.append(line)
 
-print("STD:")
-print(std)
+img_name = labels[idx].split(',')[0]
 
-print("Max:")
-print(max)
+imageFile = os.path.join(Dataset_Path, img_name)
+if os.path.isfile(imageFile):
+    image = cv2.imread(imageFile)
+    dim = (int(image.shape[1] / 1), int(image.shape[0] / 1))
+    imageScaled = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+    cv2.circle(imageScaled, center, 2, (0, 0, 255), 1)
+    cv2.circle(imageScaled, center, 8, (0, 255, 0), 1)
+    cv2.imshow(imageFile, imageScaled)
+    key = cv2.waitKey(0)
+    cv2.destroyWindow(imageFile)
+    if key == ord('q'):
+        exit(0)
 
-print("Min:")
-print(min)
