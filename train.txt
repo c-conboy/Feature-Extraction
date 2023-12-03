@@ -1,0 +1,1 @@
+python train.py -cuda Y -e 100 -weights model.pth
