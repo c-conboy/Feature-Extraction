@@ -1,4 +1,4 @@
-#Import Modules
+# Import Modules
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -16,53 +16,53 @@ from dataset import DoggyDataset
 import cv2
 import argparse
 import math
-import statistics 
+import statistics
 
 
-#Parse Input Arguments
+# Parse Input Arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-weights', type=str, default = None)
-parser.add_argument('-index', type=int, help='[Y/N]', default = 0)
-parser.add_argument('-dataset', type=str, default = '../datasets/doggies/images_test')
-parser.add_argument('-label', type=str, default = '../datasets/doggies/test_labels.txt')
+parser.add_argument("-weights", type=str, default=None)
+parser.add_argument("-index", type=int, help="[Y/N]", default=0)
+parser.add_argument("-dataset", type=str, default="../datasets/doggies/images_test")
+parser.add_argument("-label", type=str, default="../datasets/doggies/test_labels.txt")
 args = parser.parse_args()
 Weights = args.weights
 Dataset_Path = args.dataset
 Label_Path = args.label
 idx = args.index
 
-#Set Device
+# Set Device
 device = torch.device("cpu")
 
-#Load Data
+# Load Data
 data_dir = Dataset_Path
 label_file = Label_Path
 test_dataset = DoggyDataset(label_file, data_dir)
 test_dataloader = torch.utils.data.DataLoader(test_dataset)
 
-#Load Model
+# Load Model
 model_ft = models.resnet18()
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 2)
-if(Weights):
-        model_ft.load_state_dict(torch.load(Weights, map_location=torch.device(device)))
+if Weights:
+    model_ft.load_state_dict(torch.load(Weights, map_location=torch.device(device)))
 model_ft = model_ft.to(device)
 
-#Get Inference
-
+# Get Inference
 start = time.time()
 output = model_ft(test_dataset[idx][0].unsqueeze(0))
 end = time.time()
-print(end - start)
-
+timeElapsed = end - start
+print("Time elapsed:", timeElapsed, "seconds")
 center = (int(output[0][0].item()), int(output[0][1].item()))
-#Visualize Image
-with open(Label_Path, "r") as f:
-        labels = []
-        for line in f:
-            labels.append(line)
 
-img_name = labels[idx].split(',')[0]
+# Visualize Image
+with open(Label_Path, "r") as f:
+    labels = []
+    for line in f:
+        labels.append(line)
+
+img_name = labels[idx].split(",")[0]
 
 imageFile = os.path.join(Dataset_Path, img_name)
 if os.path.isfile(imageFile):
@@ -74,6 +74,5 @@ if os.path.isfile(imageFile):
     cv2.imshow(imageFile, imageScaled)
     key = cv2.waitKey(0)
     cv2.destroyWindow(imageFile)
-    if key == ord('q'):
+    if key == ord("q"):
         exit(0)
-
